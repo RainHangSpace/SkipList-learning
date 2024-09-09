@@ -10,6 +10,8 @@
 #include "skiplist.h"
 #include <string>
 #include <ctime>
+
+constexpr char WRITE_FILE[] = "./data/writeDB";
 int main() {
     std::srand(std::time(0)); // 设置随机种子
     //测试1：
@@ -26,24 +28,40 @@ int main() {
     
     
     //测试2：
+    // SkipList<std::string, int> SkipList1(7);
+    // SkipList1.insert_element("zhangyuhan", 363);
+    // SkipList1.display_list();
+    // std::cout << '\n';
+    // SkipList1.insert_element("zhangyuhan", 363);
+    // SkipList1.insert_element("wangyumeng", 636);
+    // SkipList1.display_list();
+
+    // SkipList1.delete_element("zhangyuhan");
+    // SkipList1.display_list();
+
+
+    //测试3：
     SkipList<std::string, int> SkipList1(7);
-    SkipList1.insert_element("zhangyuhan", 363);
-    SkipList1.display_list();
-    std::cout << '\n';
-    SkipList1.insert_element("zhangyuhan", 363);
-    SkipList1.insert_element("wangyumeng", 636);
-    SkipList1.display_list();
-
-    SkipList1.delete_element("zhangyuhan");
-    SkipList1.display_list();
-
-    SkipList1.delete_element("wangyumeng");
     SkipList1.insert_element("heishenhua", 268);
-    SkipList1.display_list();
+    SkipList1.insert_element("wukong", 328);
+    SkipList1.insert_element("zhubajie", 188);
+    SkipList1.insert_element("wuneng", 648);
+    SkipList1.insert_element("guangzhi", 777);
+    SkipList1.insert_element("jinchanzi", 888);
+    SkipList1.insert_element("zhangyuhan", 363);
+    SkipList1.insert_element("wangyumeng", 348);
 
-    if (SkipList1.search_element("wangyumeng"))
-        std::cout << "Search Success";
-    else 
-        std::cout << "Search Failed";
+    //保存文件
+    SkipList1.dump_file(WRITE_FILE);
+
+    //加载文件
+    SkipList<std::string, int> SkipList2(6);
+    SkipList2.load_file(WRITE_FILE);
+    SkipList2.display_list();
+
+    // if (SkipList1.search_element("wangyumeng"))
+    //     std::cout << "Search Success";
+    // else 
+    //     std::cout << "Search Failed";
 
 }

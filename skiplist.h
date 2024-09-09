@@ -11,7 +11,12 @@
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
+#include <sstream>
+#include <exception>
+#include <typeinfo>
 
+constexpr char delimiter[] = ":";
+ 
 //class declaration for SkipList
 template<typename K, typename V>
 class SkipList;
@@ -92,10 +97,15 @@ public:
     void display_list();
     bool search_element(K);
     bool delete_element(K);
-    void dump_file();
-    void load_file();
+
+    void dump_file(const std::string);
+    void load_file(const std::string);
+
     void clear(Node<K, V>*);
     size_t size();
+    bool is_valid_string(const std::string& str);
+    void get_key_value_from_string(const std::string& str, std::string& key, std::string& value);
+
     
 private:
     //Maximum level of the skip list
@@ -280,5 +290,63 @@ bool SkipList<K, V>::delete_element(K target) {
     return false;
 }
 
+//保存数据
+template <typename K, typename V>
+void SkipList<K, V>::dump_file(const std::string relative_write_file_path) {
+    _file_writer.open(relative_write_file_path); // 打开文件
+    Node<K, V>* node = _header->_forward[0]; // 从头节点开始遍历
 
+    while (node != nullptr) {
+        _file_writer << node->get_key() << ":" << node->get_value() << ";\n"; // 写入键值对
+        node = node->_forward[0]; // 移动到下一个节点
+    }
 
+    _file_writer.flush(); // 刷新缓冲区，确保数据完全写入
+    _file_writer.close(); // 关闭文件
+}
+
+template <typename K, typename V>
+bool SkipList<K, V>::is_valid_string(const std::string& str) {
+    return !str.empty() && str.find(delimiter) != std::string::npos;
+}
+
+template <typename K, typename V>
+void SkipList<K, V>::get_key_value_from_string(const std::string& str, std::string& key, std::string& value) {
+    if (!is_valid_string(str)) {
+        return;
+    }
+    key = str.substr(0, str.find(delimiter));
+    value = str.substr(str.find(delimiter) + 1);
+}
+
+//读取数据
+template <typename K, typename V>
+void SkipList<K, V>::load_file(const std::string relative_read_file_path) {
+    _file_reader.open(relative_read_file_path);
+    std::string line;
+    std::string key;
+    std::string value;
+
+    while (getline(_file_reader, line)) {
+        get_key_value_from_string(line, key, value);
+        if (key.empty() || value.empty()) {
+            continue;
+        }
+        
+        std::istringstream iss_key(key);
+        std::istringstream iss_value(value);
+        K key_converted;
+        V value_converted;
+        if (!(iss_key >> key_converted))
+            throw std::runtime_error("Unsupported type " + std::string(typeid(K).name()));
+            // throw std::runtime_error("Conversion failed for type " + std::string(typeid(T).name()));
+        if (!(iss_value >> value_converted))
+            throw std::runtime_error("Unsupported type " + std::string(typeid(V).name()));
+        insert_element(key_converted, value_converted);
+        // std::cout << "key:" << key << "value:" << value << std::endl;
+    }
+
+    // delete key;
+    // delete value;
+    _file_reader.close();
+}
