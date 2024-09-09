@@ -91,7 +91,7 @@ public:
     bool insert_element(K, V);
     void display_list();
     bool search_element(K);
-    void delete_element(K);
+    bool delete_element(K);
     void dump_file();
     void load_file();
     void clear(Node<K, V>*);
@@ -192,6 +192,9 @@ bool SkipList<K, V>::insert_element(K k, V v) {
     // std::cout << "current:" << _header << '\n';
     //用数组记录插入节点时，需要更新的前驱结点
     Node<K, V>* pre_node_to_update[_max_level + 1];
+    for (size_t i = 0; i < _max_level + 1; ++i) {
+        pre_node_to_update[i] = nullptr;
+    }
 
     //注意：用size_t进行索引的时候 不能以大于等于零作判断条件
     for (size_t i = _skip_list_level + 1; i > 0; --i) {
@@ -231,6 +234,7 @@ bool SkipList<K, V>::insert_element(K k, V v) {
     return true;
 }
 
+//display
 template<typename K, typename V>
 void SkipList<K, V>::display_list() {
     Node<K, V>* current = nullptr;
@@ -245,6 +249,35 @@ void SkipList<K, V>::display_list() {
         std::cout << '\n';
     }
     std::cout << std::endl;
+}
+
+// 删除
+template<typename K, typename V> 
+bool SkipList<K, V>::delete_element(K target) {
+    Node<K, V>* current = _header;
+    Node<K, V>* pre_node_to_update[_skip_list_level + 1];
+
+    for (size_t i = _skip_list_level + 1; i > 0; --i) {
+        while (current->_forward[i - 1] && current->_forward[i - 1]->get_key() < target) {
+            current = current->_forward[i - 1];
+        }
+        pre_node_to_update[i - 1] = current;
+    }
+
+    current = current->_forward[0];
+    if (current && current->get_key() == target) {
+        size_t cur_level = current->_nodeLevel;
+        for (size_t i = 0; i <= cur_level; ++i) {
+            pre_node_to_update[i]->_forward[i] = current->_forward[i];
+        }
+        delete current;
+        --_element_count;
+        while(_skip_list_level > 0 && _header->_forward[_skip_list_level] == nullptr) {
+            --_skip_list_level;
+        }
+        return true;
+    }
+    return false;
 }
 
 

@@ -34,7 +34,16 @@ int main() {
     SkipList1.insert_element("wangyumeng", 636);
     SkipList1.display_list();
 
+    SkipList1.delete_element("zhangyuhan");
+    SkipList1.display_list();
+
+    SkipList1.delete_element("wangyumeng");
+    SkipList1.insert_element("heishenhua", 268);
+    SkipList1.display_list();
+
     if (SkipList1.search_element("wangyumeng"))
         std::cout << "Search Success";
+    else 
+        std::cout << "Search Failed";
 
 }
